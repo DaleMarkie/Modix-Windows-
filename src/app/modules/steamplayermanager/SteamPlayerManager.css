@@ -1,468 +1,477 @@
-:root {
-  --bg-dark: #121212;
-  --panel-bg: #1e1e1e;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --accent: #4caf50;
-  --accent-hover: #66bb6a;
-  --danger: #e53935;
-  --danger-light: #ef9a9a;
-  --border-color: #2a2a2a;
-  --shadow-color: rgba(0, 0, 0, 0.7);
-  --transition-speed: 0.3s;
+/* Container for buttons */
+.grid {
+  background-color: #121212; /* nice dark black background */
+  padding: 1.5rem; /* 24px */
+  border-radius: 0.5rem; /* 8px rounded corners */
 }
 
-body,
-.steam-player-manager {
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.steam-player-manager {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-/* Header */
-.spm-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.375rem;
-}
-
-.spm-header h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--accent);
-  margin: 0;
-  gap: 0.4rem;
-  display: flex;
-  align-items: center;
-}
-
-/* Controls */
-.spm-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  min-width: 220px;
-}
-
-/* Search Bar */
-.search-bar {
-  background-color: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 0.2rem 0.4rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 1 1 160px;
-  color: var(--text-secondary);
-  transition: border-color var(--transition-speed);
-}
-
-.search-bar input {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-primary);
-  font-size: 0.7rem;
-  width: 100%;
-}
-
-.search-bar:hover,
-.search-bar:focus-within {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* Toggles */
-.view-toggle,
-.sort-toggle {
-  display: flex;
-  gap: 0.4rem;
-  background: var(--panel-bg);
-  border-radius: 4px;
-  padding: 0.1rem;
-  border: 1px solid var(--border-color);
-}
-
-.view-toggle button,
-.sort-toggle button {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0.3rem 0.6rem;
+/* Buttons */
+.btn-admin-action {
+  background-color: #2e7d32; /* dark green */
+  color: white;
+  padding: 0.5rem 1rem; /* vertical 8px, horizontal 16px */
+  border-radius: 0.375rem; /* 6px */
   font-weight: 600;
-  font-size: 0.65rem;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  transition: background-color var(--transition-speed),
-    color var(--transition-speed);
-}
-
-.view-toggle button.active,
-.sort-toggle button.active {
-  background-color: var(--accent);
-  color: #121212;
-  font-weight: 700;
-  box-shadow: 0 0 5px var(--accent);
-}
-
-.view-toggle button:hover:not(.active),
-.sort-toggle button:hover:not(.active) {
-  color: var(--accent-hover);
-}
-
-/* Player List */
-.player-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 0.75rem;
-  flex-grow: 1;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-  max-height: 15%;
-}
-
-/* Player Card */
-.player-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--panel-bg);
-  border-radius: 7.5px;
-  padding: 0.15rem 1rem; /* reduced vertical padding */
+  border: none;
   cursor: pointer;
-  box-shadow: 0 2px 5px var(--shadow-color);
-  transition: background-color var(--transition-speed),
-    box-shadow var(--transition-speed);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.player-card:hover {
-  background-color: #2a2a2a;
-  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.5);
-}
-
-.player-card.online {
-  border-left: 3px solid var(--accent);
-}
-
-.player-card.offline {
-  border-left: 3px solid var(--danger);
-}
-
-.highlight-user {
-  border-left-color: #fbc02d !important;
-  box-shadow: 0 0 10px #fbc02d;
-}
-
-/* Avatar */
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 0.75rem;
-  flex-shrink: 0;
-}
-
-/* Info */
-.player-info {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.05rem; /* tighter gap */
-}
-
-.player-info h3 {
-  font-size: 0.7rem; /* smaller font size */
-  margin: 0;
-  line-height: 1.1; /* tighter line height */
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.player-info p {
-  font-size: 0.6rem; /* smaller font size */
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.1; /* tighter line height */
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* Status Label */
-.status-label {
-  min-width: 55px;
-  text-align: center;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.6rem;
-  font-weight: 600;
-  border-radius: 10px;
+  transition: background-color 0.2s ease-in-out;
   user-select: none;
-  flex-shrink: 0;
-  color: var(--panel-bg);
-  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
 }
 
-.online-label {
-  background-color: var(--accent);
-  color: #121212;
+.btn-admin-action:hover {
+  background-color: #256529; /* slightly darker green on hover */
 }
 
-.offline-label {
-  background-color: var(--danger);
-  color: #fff;
+.btn-admin-action:active {
+  background-color: #1b4218; /* even darker on active press */
 }
 
-/* VAC Status */
-.vac-banned,
-.vac-clean {
-  font-size: 0.65rem;
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
+.btn-admin-action:focus {
+  outline: 2px solid #66bb6a; /* bright green outline on focus */
+  outline-offset: 2px;
 }
-
-.vac-banned {
-  color: var(--danger);
-}
-
-.vac-clean {
-  color: var(--accent);
-}
-
-/* Special Badge */
-.special-badge {
-  color: #fbc02d;
-  font-size: 0.9rem;
-}
-
-/* VPN Detected */
-.vpn-detected {
-  display: inline-flex;
-  align-items: center;
-  color: #e74c3c;
-  font-weight: 600;
-  margin-top: 3px;
-  gap: 3px;
-}
-
-.vpn-detected svg {
-  color: #e74c3c;
-}
-
-/* Scrollbar */
-.player-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.player-list::-webkit-scrollbar-track {
-  background: var(--bg-dark);
-}
-
-.player-list::-webkit-scrollbar-thumb {
-  background-color: var(--accent);
-  border-radius: 3px;
-}
-
-/* Modal */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  padding: 0.75rem;
-}
-
-.modal-content {
-  background-color: var(--panel-bg);
-  border-radius: 9px;
-  max-width: 360px;
-  width: 22%;
-  padding: 1rem;
-  box-shadow: 0 6px 18px var(--shadow-color);
-  color: var(--text-primary);
-  position: relative;
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: color var(--transition-speed);
-}
-
-.modal-close-btn:hover {
-  color: var(--accent);
-}
-
-#modal-title {
-  font-size: 1.1rem;
-  margin: 0 0 0.75rem 0;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.modal-body {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.modal-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 0 8px var(--accent);
-}
-
-.player-details-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.75rem;
-}
-
-.player-details-list li {
-  margin-bottom: 0.5rem;
-  display: flex;
-  gap: 0.2rem;
-}
-
-.player-details-list strong {
-  min-width: 60px;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .spm-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .spm-controls {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .player-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .player-info {
-    width: 100%;
-  }
-
-  .status-label {
-    align-self: flex-start;
-  }
-}
-
-/* Country Flag */
-.country-flag {
-  width: 24px;
-  height: 18px;
-  margin-left: 6px;
-  border-radius: 2px;
-  object-fit: cover;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
-}
-
-/* Banned Player Card */
-.player-card.banned {
-  opacity: 0.6;
-  border-left: 4px solid red;
-}
-
-.ban-icon {
-  color: red;
-  margin-left: 5px;
-}
-
-/* Modal overrides */
+/* Backdrop */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 15, 15, 0.85); /* semi-transparent black */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal container */
+.modal-content {
+  background-color: #121212; /* deep black */
+  color: #ffffff; /* white text */
+  max-width: 800px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 40px rgba(0, 255, 100, 0.1);
+  overflow-y: auto;
+  max-height: 90vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Modal Title */
+.modal-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+/* Avatar styling */
+.modal-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+  border: 2px solid #2e7d32;
+}
+
+/* Paragraph content */
+.modal-content p {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #d0d0d0;
+}
+
+/* Modal close button */
+.modal-content button {
+  background-color: #2e7d32;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.modal-content button:hover {
+  background-color: #256529;
+}
+
+/* Admin Tool Buttons Grid */
+.spm-admin-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Admin Tool Buttons */
+.btn-admin-action {
+  background-color: #2e7d32;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  text-align: center;
+}
+
+.btn-admin-action:hover {
+  background-color: #256529;
+}
+
+.btn-admin-action:active {
+  background-color: #1b4218;
+}
+
+.btn-admin-action:focus {
+  outline: 2px solid #66bb6a;
+  outline-offset: 2px;
+}
+/* === Steam Player Manager Root === */
+.spm-container {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* === Top Info Bar (Host, Container, User) === */
+.spm-info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: #cccccc;
+}
+
+.spm-info-bar span {
+  font-weight: 500;
+  color: #90ee90; /* subtle green for highlight */
+}
+
+/* === Search + Filters === */
+.spm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.spm-search-input {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #333;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  width: 280px;
+}
+
+.spm-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.spm-filter-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #bbbbbb;
+  font-size: 0.85rem;
+}
+
+/* === Player Table === */
+.spm-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #101010;
+  border: 1px solid #222;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.spm-table th,
+.spm-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #222;
+}
+
+.spm-table th {
+  background-color: #181818;
+  color: #90ee90;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.spm-table tr:hover {
+  background-color: #1d1d1d;
+}
+
+.spm-table td {
+  color: #dddddd;
+}
+
+.spm-table td .flag {
+  font-size: 1rem;
+}
+
+/* === Status Icons === */
+.status-online {
+  color: #00ff88;
+}
+.status-offline {
+  color: #888;
+}
+.status-banned {
+  color: #ff5555;
+}
+.status-note {
+  color: #ffcc00;
+}
+
+/* === Edit Button === */
+.edit-note-btn {
+  background-color: #2e7d32;
+  color: white;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: none;
+}
+
+.edit-note-btn:hover {
+  background-color: #256529;
+}
+
+/* === Pagination === */
+.spm-pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #cccccc;
 }
 
-.modal-content {
-  max-width: 400px;
-  padding: 1.25rem;
+.spm-pagination button {
+  background-color: #1c1c1c;
+  color: #ffffff;
+  border: 1px solid #333;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
-
-/* Tooltip */
-.tooltip {
-  position: relative;
-  display: inline-block;
-  cursor: help;
+.spm-pagination button:hover {
+  background-color: #2e7d32;
 }
-
-.tooltip .tooltip-text {
-  visibility: hidden;
-  width: 180px;
-  background-color: var(--panel-bg);
-  color: var(--text-primary);
-  text-align: center;
+/* === Admin Action Buttons === */
+.btn-admin-action {
+  background-color: #1e3a1e;         /* dark green */
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  border: 1px solid #2e7d32;
   border-radius: 6px;
-  padding: 0.5rem;
-  position: absolute;
-  z-index: 10;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -90px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
+.btn-admin-action:hover {
+  background-color: #2e7d32;         /* lighter green on hover */
+  border-color: #3fa543;
+}
+
+.btn-admin-action:active {
+  background-color: #256529;
+  transform: scale(0.98);
+}
+
+.btn-admin-action:focus {
+  outline: 2px solid #3fa543;
+  outline-offset: 2px;
+}
+.admin-tools-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  margin-top: 1rem;
+}
+/* === Wrapper === */
+.steam-player-manager {
+  background-color: #0f0f0f;
+  color: #eaeaea;
+  padding: 1.25rem;
+  border-radius: 10px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.steam-player-manager h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+/* === Controls === */
+.spm-controls {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.spm-controls input[type="text"],
+.container-filter select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background-color: #1a1a1a;
+  color: #f0f0f0;
+  font-size: 0.85rem;
+}
+
+/* === Sort Buttons === */
+.sort-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.sort-controls button {
+  padding: 0.3rem 0.5rem;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.sort-controls button.active {
+  background: #2e7d32;
+  color: white;
+}
+
+/* === Filter Checkboxes === */
+.filter-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.filter-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filter-checkboxes input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #2e7d32;
+}
+
+/* === Pagination === */
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.pagination-controls button {
+  background: #2e7d32;
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.pagination-controls button:disabled {
+  background: #444;
+  cursor: not-allowed;
+}
+
+/* === Table === */
+.spm-table {
+  width: 100%;
+  font-size: 0.8rem;
+  border-collapse: collapse;
+  background-color: #121212;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.spm-table th,
+.spm-table td {
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid #2a2a2a;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.spm-table th {
+  background-color: #1d1d1d;
+  color: #aaa;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.spm-table tbody tr:hover {
+  background-color: #222;
+}
+
+.banned-player {
+  background-color: #2b0000;
+}
+
+.avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #555;
+}
+
+/* === Notes === */
+.spm-table td input[type="text"] {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  background: #1d1d1d;
+  border: 1px solid #444;
+  color: #eee;
+  border-radius: 3px;
+  width: 100%;
+}
+
+.spm-table td button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  background: #333;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #ccc;
+  cursor: pointer;
+  margin-left: 0.3rem;
+}
+
+.spm-table td button:hover {
+  background-color: #3fa543;
+  color: #fff;
 }

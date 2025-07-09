@@ -18,47 +18,11 @@ type FirewallLog = {
   protocol: string;
 };
 
-const sampleRules: FirewallRule[] = [
-  {
-    id: 1,
-    action: "allow",
-    protocol: "tcp",
-    port: "80",
-    ipRange: "any",
-    description: "Allow HTTP traffic",
-  },
-  {
-    id: 2,
-    action: "deny",
-    protocol: "tcp",
-    port: "22",
-    ipRange: "any",
-    description: "Block SSH from outside",
-  },
-];
-
-const sampleLogs: FirewallLog[] = [
-  {
-    timestamp: new Date().toISOString(),
-    ip: "203.0.113.42",
-    action: "blocked",
-    port: 22,
-    protocol: "tcp",
-  },
-  {
-    timestamp: new Date().toISOString(),
-    ip: "198.51.100.7",
-    action: "allowed",
-    port: 80,
-    protocol: "tcp",
-  },
-];
-
 export default function Firewall() {
-  const [rules, setRules] = useState<FirewallRule[]>(sampleRules);
-  const [logs, setLogs] = useState<FirewallLog[]>(sampleLogs);
+  const [rules, setRules] = useState<FirewallRule[]>([]);
+  const [logs, setLogs] = useState<FirewallLog[]>([]);
   const [autoBlock, setAutoBlock] = useState(false);
-  const [geoBlockList, setGeoBlockList] = useState<string[]>(["CN", "RU"]);
+  const [geoBlockList, setGeoBlockList] = useState<string[]>([]);
   const [newRule, setNewRule] = useState<Omit<FirewallRule, "id">>({
     action: "deny",
     protocol: "tcp",
@@ -67,35 +31,108 @@ export default function Firewall() {
     description: "",
   });
 
-  function addRule() {
+  // Fetch current rules and logs from your backend
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const rulesRes = await fetch("/api/docker/firewall/rules");
+        const rulesData: FirewallRule[] = await rulesRes.json();
+        setRules(rulesData);
+
+        const logsRes = await fetch("/api/docker/firewall/logs");
+        const logsData: FirewallLog[] = await logsRes.json();
+        setLogs(logsData);
+
+        const geoRes = await fetch("/api/docker/firewall/geoblock");
+        const geoData: string[] = await geoRes.json();
+        setGeoBlockList(geoData);
+
+        const autoBlockRes = await fetch("/api/docker/firewall/autoblock");
+        const autoBlockData: { enabled: boolean } = await autoBlockRes.json();
+        setAutoBlock(autoBlockData.enabled);
+      } catch (error) {
+        console.error("Error fetching firewall data", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Add a new firewall rule
+  async function addRule() {
     if (!newRule.port) return alert("Port is required");
-    setRules([
-      ...rules,
-      {
-        id: Date.now(),
-        ...newRule,
-      },
-    ]);
-    setNewRule({
-      action: "deny",
-      protocol: "tcp",
-      port: "",
-      ipRange: "any",
-      description: "",
-    });
+    try {
+      const res = await fetch("/api/docker/firewall/rules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRule),
+      });
+      if (!res.ok) throw new Error("Failed to add rule");
+      const addedRule = await res.json();
+      setRules([...rules, addedRule]);
+      setNewRule({
+        action: "deny",
+        protocol: "tcp",
+        port: "",
+        ipRange: "any",
+        description: "",
+      });
+    } catch (e) {
+      alert(e.message);
+    }
   }
 
-  function removeRule(id: number) {
-    setRules(rules.filter((r) => r.id !== id));
+  // Remove a firewall rule by ID
+  async function removeRule(id: number) {
+    try {
+      const res = await fetch(`/api/docker/firewall/rules/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete rule");
+      setRules(rules.filter((r) => r.id !== id));
+    } catch (e) {
+      alert(e.message);
+    }
   }
 
-  function removeGeoBlock(code: string) {
-    setGeoBlockList(geoBlockList.filter((c) => c !== code));
+  // Update Auto Block setting
+  async function toggleAutoBlock(enabled: boolean) {
+    try {
+      const res = await fetch("/api/docker/firewall/autoblock", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      if (!res.ok) throw new Error("Failed to update auto block");
+      setAutoBlock(enabled);
+    } catch (e) {
+      alert(e.message);
+    }
   }
 
-  function addGeoBlock(code: string) {
-    if (!geoBlockList.includes(code)) {
+  // Add or remove Geo Block country codes similarly via backend API
+  async function addGeoBlock(code: string) {
+    try {
+      const res = await fetch("/api/docker/firewall/geoblock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ countryCode: code }),
+      });
+      if (!res.ok) throw new Error("Failed to add geo block");
       setGeoBlockList([...geoBlockList, code]);
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  async function removeGeoBlock(code: string) {
+    try {
+      const res = await fetch(`/api/docker/firewall/geoblock/${code}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to remove geo block");
+      setGeoBlockList(geoBlockList.filter((c) => c !== code));
+    } catch (e) {
+      alert(e.message);
     }
   }
 
@@ -109,7 +146,7 @@ export default function Firewall() {
           type="checkbox"
           id="autoBlock"
           checked={autoBlock}
-          onChange={(e) => setAutoBlock(e.target.checked)}
+          onChange={(e) => toggleAutoBlock(e.target.checked)}
         />
       </section>
 
