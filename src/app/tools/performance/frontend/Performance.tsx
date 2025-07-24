@@ -1,7 +1,67 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./Performance.css";
 
-const UsageBar = ({ percent, color }: { percent: number; color: string }) => (
+interface CpuStats {
+  usagePerCore: number[];
+  loadAverage: number[];
+}
+
+interface MemoryStats {
+  total: number;
+  used: number;
+  free: number;
+  buffers: number;
+  cache: number;
+  swapTotal: number;
+  swapUsed: number;
+}
+
+interface DiskStats {
+  name: string;
+  used: number;
+  total: number;
+  percent: number;
+}
+
+interface NetworkStats {
+  name: string;
+  rxMBps: number;
+  txMBps: number;
+}
+
+interface ProcessStats {
+  pid: number;
+  name: string;
+  cpuPercent: number;
+}
+
+interface DdosStats {
+  attackDetected: boolean;
+  attackType: string;
+  packetRate: number;
+  durationSeconds: number;
+  bandwidthSpikePercent: number;
+  sourceIPs: string[];
+}
+
+interface PerformanceStats {
+  cpu: CpuStats;
+  memory: MemoryStats;
+  disks: DiskStats[];
+  network: NetworkStats[];
+  totalProcesses: number;
+  topProcesses: ProcessStats[];
+  uptime: string;
+  ddos?: DdosStats;
+}
+
+const UsageBar = ({
+  percent,
+  color,
+}: {
+  percent: number;
+  color: string;
+}): JSX.Element => (
   <div className="usageBarContainer">
     <div
       className="usageBar"
@@ -15,21 +75,31 @@ const UsageBar = ({ percent, color }: { percent: number; color: string }) => (
 );
 
 const Performance = () => {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<PerformanceStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const cpuCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const fetchStats = async () => {
     setLoading(true);
+    setError(null);
+    let isMounted = true;
     try {
-      // Replace this mock data with your real API call
-      const data = await fetch("/api/performance").then((res) => res.json());
-      setStats(data);
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
+      const res = await fetch("/api/performance");
+      if (!res.ok) {
+        throw new Error(`API error: ${res.status} ${res.statusText}`);
+      }
+      const data: PerformanceStats = await res.json();
+      if (isMounted) setStats(data);
+    } catch (err: any) {
+      console.error("Failed to fetch stats:", err);
+      if (isMounted) setError(err.message || "Failed to fetch stats");
     }
-    setLoading(false);
+    if (isMounted) setLoading(false);
+    return () => {
+      isMounted = false;
+    };
   };
 
   useEffect(() => {
@@ -38,7 +108,11 @@ const Performance = () => {
 
   useEffect(() => {
     if (!autoRefresh) return;
-    const interval = setInterval(fetchStats, 5000);
+
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 5000);
+
     return () => clearInterval(interval);
   }, [autoRefresh]);
 
@@ -70,14 +144,19 @@ const Performance = () => {
       </section>
 
       {loading && <p>Loading stats...</p>}
+      {error && (
+        <p className="errorMsg" role="alert">
+          Error: {error}
+        </p>
+      )}
 
-      {stats && (
+      {stats && !error && (
         <>
           <section className="grid" aria-live="polite">
             <article className="cpuSection" aria-label="CPU Usage">
               <h2>CPU Usage</h2>
               <div className="cpuCores">
-                {stats.cpu.usagePerCore.map((usage: number, idx: number) => (
+                {stats.cpu.usagePerCore.map((usage, idx) => (
                   <div className="cpuCore" key={idx}>
                     <strong>Core {idx + 1}</strong>
                     <UsageBar percent={usage} color="#80deea" />
@@ -114,7 +193,7 @@ const Performance = () => {
 
             <article className="diskSection" aria-label="Disk Usage">
               <h2>Disk Usage</h2>
-              {stats.disks.map((disk: any) => (
+              {stats.disks.map((disk) => (
                 <div className="diskInfo" key={disk.name}>
                   <strong>{disk.name}</strong>
                   <p>
@@ -127,18 +206,18 @@ const Performance = () => {
 
             <article className="networkSection" aria-label="Network Interfaces">
               <h2>Network Traffic</h2>
-              {stats.network.map((iface: any) => (
+              {stats.network.map((iface) => (
                 <div className="networkIface" key={iface.name}>
                   <strong>{iface.name}</strong>
                   <p>
                     RX: {iface.rxMBps} MB/s | TX: {iface.txMBps} MB/s
                   </p>
                   <UsageBar
-                    percent={Math.min(100, (iface.rxMBps / 100) * 100)}
+                    percent={Math.min(100, iface.rxMBps)}
                     color="#80deea"
                   />
                   <UsageBar
-                    percent={Math.min(100, (iface.txMBps / 100) * 100)}
+                    percent={Math.min(100, iface.txMBps)}
                     color="#4dd0e1"
                   />
                 </div>
@@ -149,7 +228,7 @@ const Performance = () => {
               <h2>Processes ({stats.totalProcesses} total)</h2>
               <p>Top CPU-consuming processes:</p>
               <ul>
-                {stats.topProcesses.map((proc: any) => (
+                {stats.topProcesses.map((proc) => (
                   <li key={proc.pid}>
                     <strong>{proc.name}</strong> (PID: {proc.pid}) - CPU:{" "}
                     {proc.cpuPercent}%
@@ -210,7 +289,7 @@ const Performance = () => {
                 <div className="ddosDetailItem ddosSourceIPs">
                   <strong>Source IPs:</strong>
                   <ul>
-                    {stats.ddos.sourceIPs.map((ip: string, i: number) => (
+                    {stats.ddos.sourceIPs.map((ip, i) => (
                       <li key={i}>{ip}</li>
                     ))}
                   </ul>
