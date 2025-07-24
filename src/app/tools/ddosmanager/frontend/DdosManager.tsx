@@ -33,40 +33,57 @@ function linePath(data: number[]) {
     .join(" ");
 }
 
-const DdosManager = () => {
+interface SuspiciousIP {
+  ip: string;
+  threatLevel: "low" | "medium" | "high";
+}
+
+interface DockerContainer {
+  id: string;
+  name: string;
+  status: string;
+  underAttack: boolean;
+}
+
+const DdosManager: React.FC = () => {
   const [attackStatus, setAttackStatus] = useState("No attacks detected");
-  const [suspiciousIPs, setSuspiciousIPs] = useState<
-    { ip: string; threatLevel: string }[]
-  >([]);
-  const [dockerContainers, setDockerContainers] = useState<
-    { id: string; name: string; status: string; underAttack: boolean }[]
-  >([]);
+  const [suspiciousIPs, setSuspiciousIPs] = useState<SuspiciousIP[]>([]);
+  const [dockerContainers, setDockerContainers] = useState<DockerContainer[]>(
+    []
+  );
   const [traffic, setTraffic] = useState(fakeTrafficData);
 
-  // Fetch real Docker containers and suspicious IPs from Modix API
   useEffect(() => {
+    let isMounted = true;
     async function fetchData() {
       try {
-        const containersRes = await fetch("/api/docker/containers");
-        const containersData = await containersRes.json();
-        setDockerContainers(containersData);
+        const [containersRes, ipsRes] = await Promise.all([
+          fetch("/api/docker/containers"),
+          fetch("/api/ddos/suspicious-ips"),
+        ]);
+        if (!containersRes.ok || !ipsRes.ok)
+          throw new Error("Network response was not ok");
 
-        const ipsRes = await fetch("/api/ddos/suspicious-ips");
-        const ipsData = await ipsRes.json();
-        setSuspiciousIPs(ipsData);
+        const containersData: DockerContainer[] = await containersRes.json();
+        const ipsData: SuspiciousIP[] = await ipsRes.json();
+
+        if (isMounted) {
+          setDockerContainers(containersData);
+          setSuspiciousIPs(ipsData);
+        }
       } catch (error) {
         console.error("Failed to fetch data:", error);
-        // fallback to empty or existing data on failure
       }
     }
     fetchData();
 
-    // Optionally refresh every 10 seconds
     const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
-  // Update attack status based on containers
   useEffect(() => {
     const underAttackCount = dockerContainers.filter(
       (c) => c.underAttack
@@ -80,21 +97,20 @@ const DdosManager = () => {
     }
   }, [dockerContainers]);
 
-  // Block IP handler - Ideally send this to your backend
   function blockIp(ip: string) {
-    // Example: POST to backend to block IP
     fetch("/api/ddos/block-ip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ip }),
-    }).then(() => {
-      // Optimistic UI update
-      setSuspiciousIPs((prev) => prev.filter((item) => item.ip !== ip));
-      alert(`Blocked IP: ${ip}`);
-    });
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to block IP");
+        setSuspiciousIPs((prev) => prev.filter((item) => item.ip !== ip));
+        alert(`Blocked IP: ${ip}`);
+      })
+      .catch((err) => alert(`Error blocking IP: ${err.message}`));
   }
 
-  // Toggle attack status for a container (simulate mitigation) - could POST to API
   function toggleMitigation(id: string) {
     setDockerContainers((prev) =>
       prev.map((c) => (c.id === id ? { ...c, underAttack: !c.underAttack } : c))
@@ -114,7 +130,7 @@ const DdosManager = () => {
         breach your servers, and execute swift mitigation actions such as
         blocking malicious IPs or toggling attack states on individual
         containers. Stay ahead of threats and maintain optimal server
-        performance with this comprehensive security control center
+        performance with this comprehensive security control center.
       </p>
 
       <section className="attack-status mb-8">
@@ -144,13 +160,14 @@ const DdosManager = () => {
 
           {traffic.map((d, i) => (
             <text
-              key={i}
+              key={`time-${i}`}
               x={scaleX(i)}
               y={height - 10}
               fill="#888"
               fontSize={10}
               textAnchor="middle"
               className="select-none"
+              aria-label={`Time ${d.time}`}
             >
               {d.time}
             </text>
@@ -160,13 +177,14 @@ const DdosManager = () => {
             const val = Math.round(maxY * (1 - v));
             return (
               <text
-                key={v}
+                key={`val-${v}`}
                 x={5}
                 y={padding + v * (height - padding * 2)}
                 fill="#888"
                 fontSize={10}
                 alignmentBaseline="middle"
                 className="select-none"
+                aria-label={`Value ${val}`}
               >
                 {val}
               </text>
