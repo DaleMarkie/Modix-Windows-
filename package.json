@@ -6,21 +6,23 @@
     "preinstall": "node scripts/setupBackend.js",
     "setup-backend": "node scripts/setupBackend.js",
     "predev": "npm run gen-import-map",
-    "dev": "npx cross-env PORT=3000 API_PORT=2010 concurrently -n FRONTEND,BACKEND -c cyan,magenta \"npm run next\" \"npm run backend-safe\"",
+    "dev": "concurrently -n FRONTEND,BACKEND,ELECTRON -c cyan,magenta,green \"npm run next\" \"npm run backend-safe\" \"wait-on http://localhost:3000 && electron .\"",
     "next": "next dev -p 3000",
     "backend": "node scripts/startBackend.js",
     "backend-safe": "node scripts/startBackend.js",
     "backend-install": "py -3 -m pip install -r backend/requirements.txt || python3 -m pip install -r backend/requirements.txt || python -m pip install -r backend/requirements.txt",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
     "lint": "next lint",
     "gen-import-map": "node scripts/generateImportMap.js",
-    "modix-installer": "node scripts/modix-installer.js"
+    "modix-installer": "node scripts/modix-installer.js",
+    "electron:build": "npm run build && electron-builder"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
+    "electron-is-dev": "^3.0.1",
     "express": "^5.1.0",
     "framer-motion": "^12.23.12",
     "inquirer": "^8.2.7",
@@ -48,11 +50,29 @@
     "@types/react-dom": "^19",
     "@types/react-icons": "^3.0.0",
     "@types/react-toastify": "^4.0.2",
-    "concurrently": "^9.2.0",
+    "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",
+    "electron": "^38.1.2",
+    "electron-builder": "^26.0.12",
+    "electron-is-dev": "^3.0.1",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.0.0"
+  },
+  "build": {
+    "appId": "com.modix.panel",
+    "productName": "Modix Game Panel",
+    "files": [
+      "out/**/*",
+      "main.js",
+      "package.json",
+      "backend/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.ico"
+    }
   }
 }
