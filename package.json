@@ -2,6 +2,7 @@
   "name": "my-panel",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "preinstall": "node scripts/setupBackend.js",
     "setup-backend": "node scripts/setupBackend.js",
@@ -11,8 +12,9 @@
     "backend": "node scripts/startBackend.js",
     "backend-safe": "node scripts/startBackend.js",
     "backend-install": "py -3 -m pip install -r backend/requirements.txt || python3 -m pip install -r backend/requirements.txt || python -m pip install -r backend/requirements.txt",
-    "build": "next build",
-    "start": "next start",
+    "build:next": "next build && next export",
+    "start": "electron .",
+    "dist": "npm run build:next && electron-builder",
     "lint": "next lint",
     "gen-import-map": "node scripts/generateImportMap.js",
     "modix-installer": "node scripts/modix-installer.js"
@@ -48,11 +50,30 @@
     "@types/react-dom": "^19",
     "@types/react-icons": "^3.0.0",
     "@types/react-toastify": "^4.0.2",
-    "concurrently": "^9.2.0",
+    "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",
+    "electron": "^38.1.2",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.0.0"
+  },
+  "build": {
+    "appId": "com.modix.gamepanel",
+    "productName": "Modix Game Panel",
+    "files": [
+      "out/**/*",
+      "electron/**/*",
+      "backend/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }

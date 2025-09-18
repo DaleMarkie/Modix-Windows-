@@ -5,7 +5,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { usePermissionsSync } from "../utils/usePermissionsSync";
 
-// ------------------ TYPES ------------------
 export interface Session {
   id: string;
   ip_address?: string;
@@ -20,7 +19,7 @@ export interface User {
   name?: string;
   avatar?: string;
 
-  active: boolean; // previously is_active
+  active: boolean;
   created_at: string;
   tfa_enabled: boolean;
   last_login: string;
@@ -48,7 +47,10 @@ interface UserContextType {
   refresh: () => void;
 }
 
-// ------------------ CONTEXT ------------------
+interface StatusData {
+  authenticated: boolean;
+}
+
 const UserContext = createContext<UserContextType>({
   user: null,
   authenticated: false,
@@ -77,20 +79,31 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const statusData = await apiHandler("/api/auth/status", {
+      const statusData = (await apiHandler("/api/auth/status", {
         cacheTtlMs: 10000,
-      });
+      })) as StatusData;
+
       setAuthenticated(!!statusData.authenticated);
 
       if (statusData.authenticated) {
-        const meData = await apiHandler("/api/auth/me", { cacheTtlMs: 10000 });
+        const meData = (await apiHandler("/api/auth/me", {
+          cacheTtlMs: 10000,
+        })) as Partial<User>;
 
         const mappedUser: User = {
-          ...meData,
-          active: meData.is_active ?? true,
+          username: meData.username ?? "Unknown User",
+          id: meData.id,
+          email: meData.email ?? "",
+          name: meData.name ?? "",
+          avatar: meData.avatar ?? "",
+          active: meData.active ?? true, // ✅ fixed
           created_at: meData.created_at ?? new Date().toISOString(),
           tfa_enabled: meData.tfa_enabled ?? false,
           last_login: meData.last_login ?? new Date().toISOString(),
+          sessions: meData.sessions ?? [],
+          roles: meData.roles ?? [],
+          direct_permissions: meData.direct_permissions ?? [],
+          role_permissions: meData.role_permissions ?? [],
         };
 
         setUser(mappedUser);
@@ -103,7 +116,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         if (typeof window !== "undefined") localStorage.removeItem("user");
       }
     } catch {
-      // ✅ No variable here, prevents no-unused-vars error
       setUser(null);
       setAuthenticated(false);
       if (typeof window !== "undefined") localStorage.removeItem("user");
@@ -112,7 +124,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Permissions sync
   usePermissionsSync({
     onMismatch: () => {
       toast.info("Your permissions have changed. Refreshing session.");

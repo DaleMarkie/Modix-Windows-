@@ -1,48 +1,40 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
-  useState,
   ReactNode,
+  useState,
+  useEffect,
 } from "react";
-import { authFetch } from "@/utils/authFetch";
+import { authFetch } from "./authFetch";
 
-interface PermissionItem {
-  permission: string;
+// -------------------- TYPES --------------------
+export interface MeResponse {
+  id?: string | number;
+  username: string;
+  direct_permissions?: Array<{ permission: string }>;
+  role_permissions?: Array<{ permission: string }>;
 }
 
-interface MeResponse {
-  direct_permissions?: PermissionItem[];
-  role_permissions?: PermissionItem[];
-}
+const PermissionsContext = createContext<string[]>([]);
 
-interface PermissionsContextType {
-  permissions: string[] | null;
-  loading: boolean;
-}
-
-const PermissionsContext = createContext<PermissionsContextType>({
-  permissions: null,
-  loading: true,
-});
-
-export function PermissionsProvider({ children }: { children: ReactNode }) {
-  const [permissions, setPermissions] = useState<string[] | null>(null);
-  const [loading, setLoading] = useState(true);
+export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
+  const [permissions, setPermissions] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchPerms() {
       try {
-        const data: MeResponse = await authFetch("/api/auth/me");
+        const response = await authFetch("/api/auth/me");
+        if (!response.ok) throw new Error("Failed to fetch permissions");
+
+        const data: MeResponse = await response.json(); // ✅ parse JSON
 
         const direct = (data.direct_permissions || []).map((p) => p.permission);
         const role = (data.role_permissions || []).map((p) => p.permission);
 
-        setPermissions(Array.from(new Set([...direct, ...role])));
-      } catch {
+        setPermissions([...direct, ...role]);
+      } catch (err) {
+        console.error("Error fetching permissions:", err);
         setPermissions([]);
-      } finally {
-        setLoading(false);
       }
     }
 
@@ -50,28 +42,10 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <PermissionsContext.Provider value={{ permissions, loading }}>
+    <PermissionsContext.Provider value={permissions}>
       {children}
     </PermissionsContext.Provider>
   );
-}
+};
 
-export function usePermissions() {
-  return useContext(PermissionsContext);
-}
-
-export function IfHasPermission({
-  required,
-  children,
-}: {
-  required: string | string[];
-  children: ReactNode;
-}) {
-  const { permissions, loading } = usePermissions();
-  if (loading || !permissions) return null;
-
-  const requiredArr = Array.isArray(required) ? required : [required];
-  const has = requiredArr.every((perm) => permissions.includes(perm));
-
-  return has ? <>{children}</> : null;
-}
+export const usePermissions = () => useContext(PermissionsContext);

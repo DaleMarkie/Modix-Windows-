@@ -1,21 +1,30 @@
 // src/utils/authFetch.ts
 
-// Auth fetch util (no Authorization header, rely on HttpOnly cookie)
-export function authFetch(input: RequestInfo, init: RequestInit = {}) {
-  // Always include credentials unless explicitly set otherwise
-  const fetchOptions = { ...init, credentials: init.credentials || "include" };
-  if (typeof window !== "undefined") {
-    //console.log("[authFetch] Fetching:", input);
-    //console.log("[authFetch] Options:", fetchOptions);
-    //console.log("[authFetch] credentials:", fetchOptions.credentials);
-    //console.log("[authFetch] document.cookie:", document.cookie);
-  }
+export interface AuthFetchInit extends RequestInit {
+  credentials?: RequestCredentials; // allow overriding credentials
+}
+
+/**
+ * Auth fetch util
+ * Automatically includes credentials (cookies) for authenticated requests.
+ */
+export async function authFetch(
+  input: RequestInfo,
+  init: AuthFetchInit = {}
+): Promise<Response> {
+  const fetchOptions: RequestInit = {
+    ...init,
+    credentials: init.credentials || "include",
+  };
+
   return fetch(input, fetchOptions);
 }
 
-// Utility to get a cookie value by name
+/**
+ * Get a cookie value by name
+ */
 export function getCookie(name: string): string | undefined {
   if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : undefined;
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : undefined;
 }
