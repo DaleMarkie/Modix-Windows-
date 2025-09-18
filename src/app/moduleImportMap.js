@@ -2,11 +2,4 @@
 export const importMap = {
   "Core/DiscordWebhooks/frontend/page.tsx": () => import("../../module_system/Core/DiscordWebhooks/frontend/page.tsx"),
   "Core/FileBrowser/frontend/page.tsx": () => import("../../module_system/Core/FileBrowser/frontend/page.tsx"),
-  "Core/ModManager/frontend/page.tsx": () => import("../../module_system/Core/ModManager/frontend/page.tsx"),
-  "Core/ModUpdater/frontend/page.tsx": () => import("../../module_system/Core/ModUpdater/frontend/page.tsx"),
-  "Core/RBAC/frontend/page.tsx": () => import("../../module_system/Core/RBAC/frontend/page.tsx"),
-  "Core/Terminal/frontend/page.tsx": () => import("../../module_system/Core/Terminal/frontend/page.tsx"),
-  "Core/TestModule/frontend/page.tsx": () => import("../../module_system/Core/TestModule/frontend/page.tsx"),
-  "Core/Workshop/frontend/page.tsx": () => import("../../module_system/Core/Workshop/frontend/page.tsx"),
-  "Optional/Backup/Frontend/page.tsx": () => import("../../module_system/Optional/Backup/Frontend/page.tsx"),
 };
