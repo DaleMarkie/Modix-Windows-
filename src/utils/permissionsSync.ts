@@ -1,17 +1,26 @@
 // src/utils/permissionsSync.ts
-// Utility to periodically check if JWT permissions match backend permissions
-// and trigger a refresh or logout if they differ.
-
 import { authFetch } from "./authFetch";
+
+interface PermissionItem {
+  permission: string;
+}
+
+interface MeResponse {
+  direct_permissions?: PermissionItem[];
+  role_permissions?: PermissionItem[];
+}
 
 export async function getBackendPermissions(): Promise<string[] | null> {
   try {
     const res = await authFetch("/api/me");
     if (!res.ok) return null;
-    const data = await res.json();
+
+    const data: MeResponse = await res.json();
+
     // Combine direct and role permissions
-    const direct = (data.direct_permissions || []).map((p: any) => p.permission);
-    const role = (data.role_permissions || []).map((p: any) => p.permission);
+    const direct = (data.direct_permissions || []).map((p) => p.permission);
+    const role = (data.role_permissions || []).map((p) => p.permission);
+
     return Array.from(new Set([...direct, ...role]));
   } catch {
     return null;
@@ -34,8 +43,15 @@ export async function checkPermissionsSync(jwtToken: string): Promise<{
 }> {
   const backendPerms = await getBackendPermissions();
   const jwtPerms = getJwtPermissions(jwtToken);
-  if (!backendPerms || !jwtPerms) return { match: false, backend: backendPerms, jwt: jwtPerms };
-  const match = backendPerms.length === jwtPerms.length && backendPerms.every(p => jwtPerms.includes(p));
+
+  if (!backendPerms || !jwtPerms) {
+    return { match: false, backend: backendPerms, jwt: jwtPerms };
+  }
+
+  const match =
+    backendPerms.length === jwtPerms.length &&
+    backendPerms.every((p) => jwtPerms.includes(p));
+
   return { match, backend: backendPerms, jwt: jwtPerms };
 }
 
