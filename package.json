@@ -9,16 +9,16 @@
     "predev": "npm run gen-import-map",
     "dev": "npx cross-env PORT=3000 API_PORT=2010 concurrently -n FRONTEND,BACKEND -c cyan,magenta \"npm run next\" \"npm run backend-safe\"",
     "next": "next dev -p 3000",
-    "backend": "node scripts/startBackend.js",
-    "backend-safe": "node scripts/startBackend.js",
+    "backend": "ts-node backend/server.ts",
+    "backend-safe": "ts-node backend/server.ts",
     "backend-install": "py -3 -m pip install -r backend/requirements.txt || python3 -m pip install -r backend/requirements.txt || python -m pip install -r backend/requirements.txt",
     "build:next": "next build",
     "start": "electron .",
-    "dist": "npm run build:next && electron-builder",
-    "lint": "next lint",
+    "dist": "npm run build:next && electron-builder --publish never",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "clean": "rm -rf dist .next",
     "gen-import-map": "node scripts/generateImportMap.js",
-    "modix-installer": "node scripts/modix-installer.js",
-    "clean": "rm -rf dist .next"
+    "modix-installer": "node scripts/modix-installer.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
@@ -59,6 +59,7 @@
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "ts-node": "^10",
     "wait-on": "^9.0.0"
   },
   "build": {
@@ -67,21 +68,26 @@
     "files": [
       ".next/**/*",
       "electron/**/*",
+      "backend/**/*.ts",
       "backend/**/*.py",
       "!backend/venv/**",
       "package.json"
     ],
-    "asarUnpack": [
-      "backend/**"
-    ],
+    "asarUnpack": ["backend/**"],
     "directories": {
       "buildResources": "assets"
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
+      ]
     },
     "linux": {
-      "target": ["AppImage", "deb"]
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
     },
     "mac": {
       "target": ["dmg", "zip"]

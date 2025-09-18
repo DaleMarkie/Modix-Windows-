@@ -62,8 +62,10 @@ app.post("/start-server", (req: Request, res: Response) => {
 
     activeGameId = gameId;
     res.json({ status: "running", message: "Server started successfully" });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    // ✅ Properly type unknown errors
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
   }
 });
 
