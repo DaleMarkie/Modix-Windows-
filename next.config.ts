@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    domains: ["cdn.cloudflare.steamstatic.com"], // allow game icon URLs
+    domains: ["cdn.cloudflare.steamstatic.com"], // allow game icon UsssRLs
   },
 };
 
