@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import "./MyAccount.css";
 import Subscriptions from "../subscriptions/subscriptions";
 import Activity from "../activity/Activity";
-import MyTickets from "../../support/mytickets/MyTickets";
 
 // ---------------- TAB BUTTON ----------------
 const TabButton = ({
@@ -78,7 +77,7 @@ const MyAccount = () => {
     "🪪 My License",
     "💳 Pricing",
     "⚙️ Settings",
-    "⚙️ Support",
+    // Support tab removed
   ];
 
   return (
@@ -175,13 +174,6 @@ const MyAccount = () => {
         <section className="card">
           <h3>⚙️ Settings</h3>
           {/* Settings form/components go here */}
-        </section>
-      )}
-
-      {/* ---------------- SUPPORT ---------------- */}
-      {activeTab === "⚙️ Support" && (
-        <section className="card">
-          <MyTickets />
         </section>
       )}
     </div>
