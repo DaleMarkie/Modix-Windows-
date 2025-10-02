@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "dev-frontend": "npx next dev -p 3000",
-    "dev-backend": "python3 -m uvicorn backend.api_main:app --host 0.0.0.0 --port 2010 --reload",
+    "dev-backend": "py -3 -m uvicorn backend.api_main:app --host 0.0.0.0 --port 2010 --reload",
     "dev": "concurrently \"npm run dev-frontend\" \"npm run dev-backend\"",
     "build": "NEXT_PUBLIC_SKIP_ESLINT=true npx next build",
     "start-frontend": "npx next start -p 3000",
-    "start-backend": "python3 -m uvicorn backend.api_main:app --host 0.0.0.0 --port 2010",
+    "start-backend": "modix-backend.exe",
     "start": "concurrently \"npm run start-frontend\" \"npm run start-backend\"",
-    "package-linux": "npm run build && tar -czvf modix-panel-linux.tar.gz .next package.json package-lock.json node_modules public src backend"
+    "build-backend": "pyinstaller --onefile backend/api_main.py --name modix-backend",
+    "build-launcher": "pyinstaller --onefile launcher.py --name modix",
+    "package-win": "npm run build && npm run build-backend && npm run build-launcher && powershell Compress-Archive -Path .next,node_modules,package.json,modix.exe,modix-backend.exe -DestinationPath modix-panel-win.zip -Force"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
