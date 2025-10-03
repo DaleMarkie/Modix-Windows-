@@ -1,5 +1,4 @@
 import os
-import subprocess
 import socket
 import asyncio
 import configparser
@@ -7,7 +6,7 @@ import json
 import httpx
 from typing import Optional
 from datetime import datetime
-
+import subprocess
 
 # FastAPI
 from fastapi import FastAPI, Request, Query
